@@ -1,3 +1,11 @@
-from django.contrib import admin
+from django.contrib import admin  # type: ignore
 
-# Register your models here.
+from .models import Favorite
+
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    # list_display = ('user', 'recipe', 'created_at')
+    list_display = ('user', 'recipe')
+    list_filter = ('user',)
+    search_fields = ('user__username', 'recipe__title')
