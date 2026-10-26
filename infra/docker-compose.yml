@@ -1,4 +1,4 @@
-version: '3.3'
+# version: '3.3'
 services:
 
   frontend:
@@ -11,6 +11,7 @@ services:
     image: nginx:1.25.4-alpine
     ports:
       - "80:80"
+    network_mode: host   # <--- ЭТО КРИТИЧНО: контейнер видит localhost хоста
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ../frontend/build:/usr/share/nginx/html/

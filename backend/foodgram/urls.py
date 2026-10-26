@@ -4,26 +4,25 @@ from django.conf.urls.static import static  # type: ignore
 from django.contrib import admin  # type: ignore
 from django.urls import include, path  # type: ignore
 from django.views.generic import TemplateView  # type: ignore
+from rest_framework.routers import DefaultRouter   # type: ignore
+
+from recipes.views import RecipeViewSet, TagViewSet, IngredientViewSet
+from users.views import CustomUserViewSet
+
+router = DefaultRouter()
+router.register('recipes', RecipeViewSet, basename='recipes')
+router.register('tags', TagViewSet, basename='tags')
+router.register('ingredients', IngredientViewSet, basename='ingredients')
+router.register('users', CustomUserViewSet, basename='users')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/', include(router.urls)),
 
-    # Auth
-    path('api/auth/', include('djoser.urls')),
     path('api/auth/', include('djoser.urls.authtoken')),
 
-    # API apps
-    path('api/recipes/', include('recipes.urls')),
-    path('api/subscriptions/', include('subscriptions.urls')),
-    path('api/favorites/', include('favorites.urls')),
-    path('api/users/', include('users.urls')),
-
-    # Docs
-    path(
-        'redoc/',
-        TemplateView.as_view(template_name='redoc.html'),
-        name='redoc'
-    ),
+    path('redoc/', TemplateView.as_view(
+        template_name='redoc.html'), name='redoc'),
 ]
 
 if settings.DEBUG:

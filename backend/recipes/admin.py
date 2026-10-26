@@ -1,12 +1,6 @@
 from django.contrib import admin  # type: ignore
 
-from .models import MeasurementUnit, Ingredient, Tag, Recipe, RecipeIngredient
-
-
-@admin.register(MeasurementUnit)
-class MeasurementUnitAdmin(admin.ModelAdmin):
-    list_display = ('short_name', 'full_name')
-    search_fields = ('short_name', 'full_name')
+from .models import Ingredient, Tag, Recipe, RecipeIngredient
 
 
 @admin.register(Ingredient)
@@ -25,14 +19,14 @@ class TagAdmin(admin.ModelAdmin):
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
     extra = 1
-    autocomplete_fields = ['ingredient', 'unit']
+    autocomplete_fields = ['ingredient',]
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'cooking_time', 'created_at')
+    list_display = ('name', 'author', 'cooking_time', 'created_at')
     list_filter = ('tags', 'cooking_time')
-    search_fields = ('title', 'text')
+    search_fields = ('name', 'text')
     filter_horizontal = ('tags',)  # виджет выбора тегов
     inlines = [RecipeIngredientInline]
     readonly_fields = ('created_at', 'updated_at')

@@ -1,31 +1,16 @@
-from django.conf import settings  # type: ignore
-from django.db import models  # type: ignore
-from django.core.validators import MinValueValidator  # type: ignore
+# recipes/models.py
 from decimal import Decimal  # type: ignore
 
-
-class MeasurementUnit(models.Model):
-    """
-    Модель связи единиц имерения ингредиентов.
-    Справочник единиц измерения ингредиентов.
-    """
-
-    short_name = models.CharField('Сокращение', max_length=20, unique=True)
-    full_name = models.CharField('Полное название', max_length=50)
-
-    class Meta:
-        verbose_name = 'Единица измерения'
-        verbose_name_plural = 'Единицы измерения'
-        ordering = ['short_name']
-
-    def __str__(self):
-        return self.short_name
+from django.conf import settings  # type: ignore
+from django.core.validators import MinValueValidator  # type: ignore
+from django.db import models  # type: ignore
 
 
 class Ingredient(models.Model):
-    """Модель ингредиента — только по названию."""
+    """Ингредиент: название и единица измерения в одной записи."""
 
-    name = models.CharField("Название", max_length=100, unique=True)
+    name = models.CharField('Название', max_length=100, unique=True)
+    measurement_unit = models.CharField('Единица измерения', max_length=50)
 
     class Meta:
         verbose_name = 'Ингредиент'
@@ -52,24 +37,24 @@ class Tag(models.Model):
 
 
 class Recipe(models.Model):
-    """Рецепты. Все поля обязательные."""
+    """Рецепт. Все поля обязательные."""
 
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='recipes',
-        verbose_name='Автор публикации'
+        verbose_name='Автор публикации',
     )
-    title = models.CharField('Название блюда', max_length=200)
+    name = models.CharField('Название блюда', max_length=200)
     image = models.ImageField(
         'Фотография блюда',
-        upload_to='recipes/images/',  # разобраться позже
+        upload_to='recipes/images/',
         help_text='Фото готового блюда',
     )
     text = models.TextField('Описание блюда/рецепт')
     cooking_time = models.PositiveIntegerField(
         'Время приготовления (мин)',
-        validators=[MinValueValidator(1)]
+        validators=[MinValueValidator(1)],
     )
     tags = models.ManyToManyField(
         Tag,
@@ -85,14 +70,11 @@ class Recipe(models.Model):
         ordering = ['-id']
 
     def __str__(self):
-        return f'{self.title} от {self.author.username}'
+        return f'{self.name} от {self.author.username}'
 
 
 class RecipeIngredient(models.Model):
-    """
-    Модель связка для рецепта и ингредиентов.
-    Ингредиент представлен в свзяке по кличесту и единице измерения.
-    """
+    """Связь рецепта и ингредиента с количеством."""
 
     recipe = models.ForeignKey(
         Recipe,
@@ -106,30 +88,25 @@ class RecipeIngredient(models.Model):
         related_name='recipe_ingredients',
         verbose_name='Ингредиент',
     )
-    quantity = models.DecimalField(
+    amount = models.DecimalField(  # было quantity
         'Количество',
         max_digits=6,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0.01'))],
     )
-    unit = models.ForeignKey(
-        MeasurementUnit,
-        on_delete=models.PROTECT,
-        verbose_name='Единица измерения'
-    )
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=('recipe', 'ingredient'),
-                name='unique_recipe_ingredient'
+                fields=['recipe', 'ingredient'],
+                name='unique_recipe_ingredient',
             ),
         ]
         verbose_name = 'Ингредиент в рецепте'
-        verbose_name_plural = 'Ингредиенты из выбраных рецептов'
+        verbose_name_plural = 'Ингредиенты в рецептах'
 
     def __str__(self):
         return (
-            f'{self.ingredient.name}: {self.quantity} {self.unit.short_name} '
-            f'в рецепте «{self.recipe.title}»'
+            f'{self.ingredient.name}: {self.amount} '
+            f'{self.ingredient.measurement_unit} в рецепте «{self.recipe.name}»'
         )
