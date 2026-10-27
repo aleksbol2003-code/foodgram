@@ -78,7 +78,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source='title')
+    name = serializers.CharField()
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True)
     ingredients = IngredientAmountSerializer(many=True)
@@ -118,10 +118,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags')
         ingredients_data = validated_data.pop('ingredients')
 
-        recipe = Recipe.objects.create(
-            author=self.context['request'].user,
-            **validated_data,
-        )
+        recipe = Recipe.objects.create(**validated_data,)
         recipe.tags.set(tags)
         self._save_ingredients(recipe, ingredients_data)
         return recipe

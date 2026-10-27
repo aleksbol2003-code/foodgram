@@ -1,4 +1,5 @@
 # users/serializers.py
+from django.contrib.auth import password_validation  # type: ignore
 from rest_framework import serializers  # type: ignore
 
 from subscriptions.models import Subscription
@@ -40,8 +41,12 @@ class SetPasswordSerializer(serializers.Serializer):
     current_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
 
-    def validate_current_passwoSrd(self, value):
+    def validate_current_password(self, value):
         user = self.context['request'].user
         if not user.check_password(value):
             raise serializers.ValidationError('Неверный текущий пароль.')
+        return value
+
+    def validate_new_password(self, value):
+        password_validation.validate_password(value, self.context['request'].user)
         return value

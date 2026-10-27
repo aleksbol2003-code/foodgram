@@ -5,7 +5,7 @@ from .models import Ingredient, Tag, Recipe, RecipeIngredient
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ('name', 'measurement_unit')
     search_fields = ('name',)
 
 
@@ -26,7 +26,7 @@ class RecipeIngredientInline(admin.TabularInline):
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('name', 'author', 'cooking_time', 'created_at')
     list_filter = ('tags', 'cooking_time')
-    search_fields = ('name', 'text')
-    filter_horizontal = ('tags',)  # виджет выбора тегов
+    search_fields = ('name', 'author', 'text')
+    filter_horizontal = ('tags',)
     inlines = [RecipeIngredientInline]
     readonly_fields = ('created_at', 'updated_at')

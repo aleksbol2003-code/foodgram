@@ -4,8 +4,9 @@ from django.http import HttpResponse  # type: ignore
 from rest_framework import status, viewsets  # type: ignore
 from rest_framework.decorators import action  # type: ignore
 from rest_framework.permissions import (  # type: ignore
-    AllowAny,
+    # AllowAny,
     IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
 )
 from rest_framework.response import Response  # type: ignore
 
@@ -19,6 +20,7 @@ from recipes.serializers import (
     TagSerializer,
 )
 from shopping_cart.models import ShoppingCart
+from .permissions import IsAuthorOrReadOnly
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -46,7 +48,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         .select_related('author')
         .prefetch_related('tags', 'ingredients__ingredient')
     )
-    permission_classes = [AllowAny]
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly,)
 
     def get_serializer_class(self):
         if self.action in ('create', 'update', 'partial_update'):

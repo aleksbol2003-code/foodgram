@@ -67,7 +67,7 @@ class CustomUserViewSet(DjoserUserViewSet):
     def subscriptions(self, request):
         queryset = (
             User.objects
-            .filter(followers__follower=request.user)   
+            .filter(followers__follower=request.user)
             .annotate(recipes_count=Count('recipes'))
             .order_by('id')
         )
@@ -84,7 +84,7 @@ class CustomUserViewSet(DjoserUserViewSet):
     # POST и DELETE /api/users/{id}/subscribe/
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=[IsAuthenticated])
-    def subscribe(self, request, pk=None):
+    def subscribe(self, request, id=None):
         author = self.get_object()  # 404, если пользователя нет
 
         if request.method == 'DELETE':
